@@ -1,0 +1,600 @@
+{% extends 'layouts/navbar.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+<div class="custom-container mt-4">
+    <!-- <h1>{{ request.session.cart }}</h1> -->
+    <h2 class="mb-4">Catálogo de Productos y Servicios</h2>
+    
+    <!-- Filtro para mostrar todos, productos o servicios -->
+    <div class="form-group">
+        <label for="filterTipo">Mostrar</label>
+        <select class="form-control" id="filterTipo">
+            <option value="todos">Todos</option>
+            <option value="productos">Productos</option>
+            <option value="servicios">Servicios</option>
+        </select>
+    </div>
+
+    <!-- Filtro interno por tipo de producto -->
+    <div class="form-group" id="filterProductoContainer" style="display: none;">
+        <label for="filterTipoProducto">Filtrar por Tipo de Producto</label>
+        <select class="form-control" id="filterTipoProducto">
+            <option value="">Todos</option>
+            {% for tipo in tipos_productos %}
+            {% if tipo.estado_producto == "Activo" %}
+            <option value="{{ tipo.idTipo_Producto }}">{{ tipo.nombre_producto }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Filtro interno por tipo de servicio -->
+    <div class="form-group" id="filterServicioContainer" style="display: none;">
+        <label for="filterTipoServicio">Filtrar por Tipo de Servicio</label>
+        <select class="form-control" id="filterTipoServicio">
+            <option value="">Todos</option>
+            {% for tipo in tipos_servicios %}
+            {% if tipo.estado_tipoServicio == "Activo" %}
+            <option value="{{ tipo.idTipo_Servicio }}">{{ tipo.nombre_tipoServicio }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="productSection">
+      <h1 id="TituloProducto">Productos</h1>
+      <div class="row" id="productCards">
+          {% for producto in productos %}
+          {% if producto.estado_catalogo == "A" and producto.id_TipoProducto.estado_producto == "Activo" and producto.estado_producto == "A" %}
+          <div class="col-md-3 mb-4 custom-product-card" data-tipo-producto="{{ producto.id_TipoProducto.idTipo_Producto }}">
+              <div class="custom-card">
+                  <div class="custom-card-image-container">
+                      <img src="{{ producto.image_url }}" alt="{{ producto.nombre }}" class="custom-image-icon"/>
+                  </div>
+                  <p class="custom-card-title">{{ producto.nombre }}</p>
+                  <p class="custom-card-des" hidden>{{ producto.descripcion }}</p>
+                  <p class="custom-card-des">Click en la imagen para ver más</p>
+                  <p class="custom-card-des">Cantidad: {{ producto.cantidad }}</p>
+                  <p style="color: #504cac;" class="custom-card-price">${{ producto.precio|floatformat:"0"|intcomma }}</p>
+                  <!-- Botón de añadir para productos -->
+                  <div class="botnGod" data-tooltip="${{ producto.precio|floatformat:"0"|intcomma }}">
+                      <div class="botnGod-wrapper" onclick="event.stopPropagation(); addToCart('{{ producto.idProducto }}', 'producto', '{{ producto.nombre }}')">
+                          <div class="textbotnGod">Añadir</div>
+                          <span class="iconbotnGod">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart2" viewBox="0 0 16 16">
+                                  <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
+                              </svg>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+      </div>
+  </div>
+
+    <!-- Contenedor para servicios -->
+    <div id="serviceSection">
+      <h1 id="TituloServicios">Servicios</h1>
+      <div class="row" id="serviceCards">
+          {% for servicio in servicios %}
+          {% if servicio.estado_catalogo == "A" and servicio.id_TipoServicio.estado_tipoServicio == "Activo" and servicio.estado_servicio == "A"%}
+          <div class="col-md-3 mb-4 custom-service-card" data-tipo-servicio="{{ servicio.id_TipoServicio.idTipo_Servicio }}">
+              <div class="custom-card">
+                  <div class="custom-card-image-container">
+                      <img src="{{ servicio.image_url }}" alt="{{ servicio.nombre_servicio }}" class="custom-image-icon"/>
+                  </div>
+                  <p class="custom-card-title">{{ servicio.nombre_servicio }}</p>
+                  <p class="custom-card-des" hidden>{{ servicio.descripcion }}</p>
+                  <p class="custom-card-des">Click en la imagen para ver más</p>
+                  <p style="color: #504cac;" class="custom-card-price">${{ servicio.precio_servicio|floatformat:"0"|intcomma }}</p>
+                  <!-- Botón de añadir para servicios -->
+                  <div class="botnGod" data-tooltip="${{ servicio.precio_servicio|floatformat:"0"|intcomma }}">
+                      <div class="botnGod-wrapper" onclick="event.stopPropagation(); addToCart('{{ servicio.idServicio }}', 'servicio', '{{ servicio.nombre_servicio }}')">
+                          <div class="textbotnGod">Añadir</div>
+                          <span class="iconbotnGod">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart2" viewBox="0 0 16 16">
+                                  <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
+                              </svg>
+                          </span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+      </div>
+    </div>
+</div> 
+<!-- Modal HTML -->
+<div id="productModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="productModalTitle"></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <center>
+                <img id="productModalImage" src="" alt="" class="img-fluid mb-3">
+              <p id="productModalDescription"></p>
+              </center>
+          </div>
+      </div>
+  </div>
+</div>  
+
+<!-- Modal HTML -->
+<div id="serviceModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="serviceModalTitle"></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <center>
+                <img id="serviceModalImage" src="" alt="" class="img-fluid mb-3">
+              <p id="serviceModalDescription"></p>
+              </center>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  
+  document.addEventListener('DOMContentLoaded', function () {
+    // Escuchar los clics en las imágenes de los productos
+    document.querySelectorAll('.custom-product-card .custom-image-icon').forEach(image => {
+        image.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se propaguen otros eventos de clic
+
+            const productoNombre = this.alt; // El nombre del producto está en el atributo alt de la imagen
+            const productoDescripcion = this.closest('.custom-product-card').querySelector('.custom-card-des').innerText;
+            const productoImagen = this.src;
+
+            document.getElementById('productModalTitle').innerText = productoNombre;
+            document.getElementById('productModalDescription').innerText = productoDescripcion;
+            document.getElementById('productModalImage').src = productoImagen;
+
+            $('#productModal').modal('show');
+        });
+    });
+
+    // Escuchar los clics en las imágenes de los servicios
+    document.querySelectorAll('.custom-service-card .custom-image-icon').forEach(image => {
+        image.addEventListener('click', function (event) {
+            event.stopPropagation(); // Evitar que se propaguen otros eventos de clic
+
+            const servicioNombre = this.alt; // El nombre del servicio está en el atributo alt de la imagen
+            const servicioDescripcion = this.closest('.custom-service-card').querySelector('.custom-card-des').innerText;
+            const servicioImagen = this.src;
+
+            document.getElementById('serviceModalTitle').innerText = servicioNombre;
+            document.getElementById('serviceModalDescription').innerText = servicioDescripcion;
+            document.getElementById('serviceModalImage').src = servicioImagen;
+
+            $('#serviceModal').modal('show');
+        });
+    });
+});
+
+
+
+function addToCart(id, type, name) {
+    fetch("{% url 'pedidos:add_to_cart' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            id: id,
+            type: type
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Éxito',
+                text: `${name} ha sido agregado al carrito.`,
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Ocurrió un error al intentar agregar al carrito.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+    });
+}
+</script>
+<!-- JavaScript para el filtrado y añadir al carrito -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterTipo = document.getElementById('filterTipo');
+    const filterProductoContainer = document.getElementById('filterProductoContainer');
+    const filterServicioContainer = document.getElementById('filterServicioContainer');
+    const filterTipoProducto = document.getElementById('filterTipoProducto');
+    const filterTipoServicio = document.getElementById('filterTipoServicio');
+    const TituloProducto = document.getElementById('TituloProducto');
+    const TituloServicios = document.getElementById('TituloServicios');
+    const productCards = document.querySelectorAll('.custom-product-card');
+    const serviceCards = document.querySelectorAll('.custom-service-card');
+
+    filterTipo.addEventListener('change', function() {
+        const selectedTipo = this.value;
+        if (selectedTipo === "todos") {
+            filterProductoContainer.style.display = 'none';
+            filterServicioContainer.style.display = 'none';
+            TituloProducto.style.display = 'block';
+            TituloServicios.style.display = 'block';
+            productCards.forEach(card => card.style.display = 'block');
+            serviceCards.forEach(card => card.style.display = 'block');
+        } else if (selectedTipo === "productos") {
+            filterProductoContainer.style.display = 'block';
+            filterServicioContainer.style.display = 'none';
+            TituloProducto.style.display = 'block';
+            TituloServicios.style.display = 'none';
+            productCards.forEach(card => card.style.display = 'block');
+            serviceCards.forEach(card => card.style.display = 'none');
+        } else if (selectedTipo === "servicios") {
+            filterProductoContainer.style.display = 'none';
+            filterServicioContainer.style.display = 'block';
+            TituloServicios.style.display = 'block';
+            TituloProducto.style.display = 'none';
+            productCards.forEach(card => card.style.display = 'none');
+            serviceCards.forEach(card => card.style.display = 'block');
+        }
+    });
+
+    filterTipoProducto.addEventListener('change', function() {
+        const selectedTipo = this.value;
+        productCards.forEach(card => {
+            const tipoProducto = card.getAttribute('data-tipo-producto');
+            if (selectedTipo === "" || selectedTipo === tipoProducto) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    filterTipoServicio.addEventListener('change', function() {
+        const selectedTipo = this.value;
+        serviceCards.forEach(card => {
+            const tipoServicio = card.getAttribute('data-tipo-servicio');
+            if (selectedTipo === "" || selectedTipo === tipoServicio) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+
+let carrito = [];
+
+
+
+</script>
+<script>
+    function removeCartItem(itemId) {
+        $.ajax({
+            url: '{% url "pedidos:remove_cart_item" %}',
+            type: 'POST',
+            data: {
+                'item_id': itemId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Actualizar el carrito después de eliminar el artículo
+                    // Puedes recargar la página o actualizar solo la sección del carrito
+                    // dependiendo de tu flujo de trabajo
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    }
+</script>
+
+<style>
+.custom-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 350px;
+  max-height: 400px;
+  background-color: #A2D9CE;
+  border-radius: 10px;
+  box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.2),
+              -5px -5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.custom-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0px 25px 25px rgba(0, 0, 0, 0.25),
+              -5px -5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.custom-card-image-container {
+  width: 100%;
+  height: 64%;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background-color: rgb(165, 165, 165);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-image-icon {
+  font-size: 40px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.custom-card-title {
+  margin: 0;
+  font-size: 17px;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  color: #000;
+  cursor: default;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.custom-card-des {
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  margin: 0;
+  font-size: 13px;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  color: #504cac;
+  cursor: default;
+}
+
+.custom-card-price {
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+}
+
+.CartBtn {
+    width: 140px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    background-color: rgb(3, 255, 95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition-duration: .5s;
+    overflow: hidden;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.103);
+    position: relative;
+  }
+  
+  .IconContainer {
+    position: absolute;
+    left: -50px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 2;
+    transition-duration: .5s;
+  }
+  
+  .icon {
+    border-radius: 1px;
+  }
+  
+  .text {
+    height: 100%;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(17, 17, 17);
+    z-index: 1;
+    transition-duration: .5s;
+    font-size: 1.04em;
+    font-weight: 600;
+  }
+  
+  .CartBtn:hover .IconContainer {
+    transform: translateX(58px);
+    border-radius: 40px;
+    transition-duration: .5s;
+  }
+  
+  .CartBtn:hover .text {
+    transform: translate(10px,0px);
+    transition-duration: .5s;
+  }
+  
+  .CartBtn:active {
+    transform: scale(0.95);
+    transition-duration: .5s;
+  }
+  
+</style>
+
+<!-- Estilo del boton de comprar -->
+
+<style>
+    .botnGod {
+      --width: 100px;
+      --height: 35px;
+      --tooltip-height: 35px;
+      --tooltip-width: 90px;
+      --gap-between-tooltip-to-button: 18px;
+      --button-color: #222;
+      --tooltip-color: #fff;
+      width: var(--width);
+      height: var(--height);
+      background: var(--button-color);
+      position: relative;
+      text-align: center;
+      border-radius: 0.5em;
+      font-family: "Arial";
+      transition: background 0.7s;
+    }
+  
+    .botnGod::before {
+      position: absolute;
+      content: attr(data-tooltip);
+      width: var(--tooltip-width);
+      height: var(--tooltip-height);
+      background-color: #555;
+      font-size: 0.9rem;
+      color: #fff;
+      border-radius: 0.25em;
+      line-height: var(--tooltip-height);
+      bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) + 10px);
+      left: calc(50% - var(--tooltip-width) / 2);
+    }
+  
+    .botnGod::after {
+      position: absolute;
+      content: "";
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-top-color: #555;
+      left: calc(50% - 10px);
+      bottom: calc(100% + var(--gap-between-tooltip-to-button) - 10px);
+    }
+  
+    .botnGod::after,
+    .botnGod::before {
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s;
+    }
+  
+    .textbotnGod {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .botnGod-wrapper,
+    .textbotnGod,
+    .iconbotnGod {
+      overflow: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      color: #fff;
+    }
+  
+    .textbotnGod {
+      top: 0;
+    }
+  
+    .textbotnGod,
+    .iconbotnGod {
+      transition: top 0.5s;
+    }
+  
+    .iconbotnGod {
+      color: #fff;
+      top: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .iconbotnGod svg {
+      width: 24px;
+      height: 24px;
+    }
+  
+    .botnGod:hover {
+      background: #222;
+    }
+  
+    .botnGod:hover .textbotnGod {
+      top: -100%;
+    }
+  
+    .botnGod:hover .iconbotnGod {
+      top: 0;
+    }
+  
+    .botnGod:hover:before,
+    .botnGod:hover:after {
+      opacity: 1;
+      visibility: visible;
+    }
+  
+    .botnGod:hover:after {
+      bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) - 20px);
+    }
+  
+    .botnGod:hover:before {
+      bottom: calc(var(--height) + var(--gap-between-tooltip-to-button));
+    }
+</style>
+{% endblock %}

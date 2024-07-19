@@ -1,0 +1,22 @@
+<title>Editar Permiso</title>
+{% extends 'layouts/navbarUsuarios.html' %}
+{% block contentConfiguracion %}
+
+<h1>Editar Permiso</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar Cambios</button>
+</form>
+{% if not request.session.usuario_id %}
+<script>
+    window.location.href = "{% url 'usuarios:requestLogin' %}";
+
+</script>
+{% elif request.session.id_rol != 1 %}
+<script>
+    window.location.href = "{% url 'usuarios:requestLogin' %}";
+
+</script>
+{% endif %}
+{% endblock %}

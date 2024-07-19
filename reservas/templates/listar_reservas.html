@@ -1,0 +1,569 @@
+<title>Listar Reservas</title>
+
+{% extends 'layouts/navbar.html' %}
+{% load static %}
+{% block content %}
+<!-- Estilos CSS -->
+<link rel="stylesheet" href="{% static 'vendors/feather/feather.css' %}" />
+<link rel="stylesheet" href="{% static 'vendors/ti-icons/css/themify-icons.css' %}" />
+<link rel="stylesheet" href="{% static 'vendors/css/vendor.bundle.base.css' %}" />
+<!-- Plugin CSS -->
+<link rel="stylesheet" href="{% static 'vendors/datatables.net-bs4/dataTables.bootstrap4.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'js/select.dataTables.min.css' %}" />
+<!-- Estilos propios -->
+<link rel="stylesheet" href="{% static 'css/vertical-layout-light/style.css' %}" />
+<link rel="stylesheet" href="{% static 'vendors/mdi/css/materialdesignicons.min.css' %}" />
+<!-- Bibliotecas JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.datatables.net/v/dt/dt-1.10.25/datatables.min.js"></script>
+<script src="{% static 'js/reservas.js' %}"></script>
+
+<!-- Contenido principal -->
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Reservas</h4>
+                <div class="table-responsive">
+                    <table id="reservaTable" class="table table hover row-border" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Fecha Reserva</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reserva in reservas %}
+                            <tr>
+                                <td>{{ reserva.usuario.nombre }}</td>
+                                <td>{{ reserva.fecha_cita }}</td>
+                                <td>{{ reserva.descripcion }}</td>
+                                <td>{{ reserva.estado }}</td>
+                                <td>
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        {% if 'Editar Reservas' in request.session.permisos %}
+                                        <button type="button" class="btn btn-inverse-warning edit-reserva"
+                                            data-toggle="modal" data-target="#editReservaModal{{ reserva.id }}"
+                                            data-Reserva="{{ reserva.Reserva.id }}" data-fecha="{{ reserva.fecha }}"
+                                            data-fecha-cita="{{ reserva.fecha_cita }}"
+                                            data-descripcion="{{ reserva.descripcion }}"
+                                            data-estado="{{ reserva.estado }}" data-reserva-id="{{ reserva.id }}">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if 'Eliminar Reservas' in request.session.permisos %}
+                                        <button type="button" class="btn btn-inverse-danger delete-reserva"
+                                            data-reserva-id="{{ reserva.id }}">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if 'Eliminar Reservas' not in request.session.permisos and 'Editar Reservas' not in request.session.permisos %}
+                                        <button type="button" class="btn btn-inverse-primary">
+                                            <i class="bi bi-exclamation-circle"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Modal para editar Reserva -->
+                            <div class="modal fade" id="editReservaModal{{ reserva.id }}" tabindex="-1" role="dialog"
+                                aria-labelledby="editReservaModal{{ reserva.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editReservaModal{{ reserva.id }}Label">Editar
+                                                Reserva</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="post" onsubmit="EditarReservaxd('{{ reserva.id }}')" id="editarReservaform{{ reserva.id }}" class="forms-sample" data-Reserva-id="{{ Reserva.id }}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="Reserva_id" value="{{ reserva.id }}">
+                                                <div class="form-row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="usuario">Nombre</label>
+                                                            <input type="text" class="form-control" id="usuario"
+                                                                readonly value="{{ reserva.usuario }}">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="fecha">Fecha</label>
+                                                            <input type="text" class="form-control" id="fecha" readonly
+                                                                value="{{ reserva.fecha }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="fecha_cita">Fecha de la Cita</label>
+                                                            <input type="datetime-local" class="form-control"
+                                                                id="fecha_cita" name="fecha_cita"
+                                                                value="{{ reserva.fecha_cita|date:'Y-m-d\TH:i' }}">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="descripcion">Descripción</label>
+                                                            <input type="textarea" class="form-control" id="descripcion"
+                                                                name="descripcion" value="{{ reserva.descripcion }}">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="estado">Estado</label>
+                                                            <select class="form-control" id="estado" name="estado">
+                                                                <option value="Pendiente" {% if
+                                                                    reserva.estado|lower=="pendiente" %} selected {%
+                                                                    endif %}>Pendiente</option>
+                                                                <option value="En Proceso" {% if
+                                                                    reserva.estado|lower=="en proceso" %} selected {%
+                                                                    endif %}>En Proceso</option>
+                                                                <option value="Completada" {% if
+                                                                    reserva.estado|lower=="completada" %} selected {%
+                                                                    endif %}>Completada</option>
+                                                            </select>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <!-- Botones -->
+                                                <div class="form-row">
+                                                    <div class="col-md-12">
+                                                        <button class="btn btn-primary mr-2">Editar {{ reserva.id }}</button>
+                                                        <button type="button" class="btn btn-light"
+                                                            data-dismiss="modal">Cancelar</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear reserva -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Registro de Reserva</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido del formulario con Bootstrap grid system -->
+                <form id="myForm" class="forms-sample" method="post" onsubmit="validateForm(event)">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_usuario">Usuario</label>
+                                {{ form.usuario }}
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha_cita">Fecha de Cita</label>
+                                {{ form.fecha_cita }}
+                            </div>
+                            <div class="form-group">
+                                <label for="descripcion">Descripción</label>
+                                {{ form.descripcion }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary mr-2">Registrar</button>
+                            <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+function validateForm() {
+    // Evitar que el formulario se envíe automáticamente
+    event.preventDefault();
+
+    // Obtener el formulario de la modal
+    const form = document.getElementById('myForm');
+
+    // Obtener el valor de la fecha y hora de la reserva dentro del formulario específico
+    const fechaCitaInput = form.querySelector('input[name="fecha_cita"]');
+    console.log("Valor del input fecha_cita:", fechaCitaInput.value);
+
+    const fechaCita = new Date(fechaCitaInput.value);
+    console.log("Objeto Date creado a partir del input:", fechaCita);
+
+    // Comprobar si la fecha y hora se ha obtenido correctamente
+    if (isNaN(fechaCita.getTime())) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Fecha y hora no válidas. Por favor, ingrese una fecha y hora correctas.',
+            icon: 'error'
+        });
+        return;
+    }
+
+    // Definir las horas límites
+    const horaInicio = 8; // 8:00 AM
+    const horaFin = 17; // 5:00 PM
+
+    // Validar la hora de la reserva
+    const horaReserva = fechaCita.getHours();
+    const minutoReserva = fechaCita.getMinutes();
+
+    // Mostrar los valores de hora y minuto para depuración
+    console.log("Hora de la reserva:", horaReserva);
+    console.log("Minuto de la reserva:", minutoReserva);
+
+    if (horaReserva < horaInicio || horaReserva >= horaFin || (minutoReserva !== 0 && minutoReserva !== 30)) {
+        // Mostrar SweetAlert de error
+        Swal.fire({
+            title: 'Error',
+            text: 'La hora debe estar entre las 8:00 AM y las 5:00 PM, y debe ser en intervalos de media hora (por ejemplo, 8:00, 8:30).',
+            icon: 'error'
+        });
+        return;
+    }
+
+    // Crear un objeto FormData para enviar los datos del formulario
+    const formData = new FormData(form);
+
+    // Realizar la solicitud POST utilizando fetch
+    fetch("{% url 'reservas:crear_reserva' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Verificar si la solicitud fue exitosa
+        if (data.success) {
+            // Mostrar SweetAlert de éxito
+            Swal.fire({
+                title: '¡Registro exitoso!',
+                text: 'La reserva se ha registrado correctamente.',
+                icon: 'success',
+                onClose: () => {
+                    // Recargar la página o realizar alguna otra acción
+                    window.location.href = "{% url 'reservas:listar_reserva' %}";
+                }
+            }).then(() => {
+                window.location.href = "{% url 'reservas:listar_reserva' %}";
+            });
+        } else if (data.message) { // Check if a message is provided in the response
+            // Mostrar SweetAlert de error con el mensaje recibido
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+            });
+        } else if (data.errors) { // Verificar si hay errores de validación
+            let errorMessage = "Hubo un error al procesar su solicitud:<br>";
+            for (const key in data.errors) {
+                errorMessage += `${data.errors[key]}<br>`;
+            }
+            // Mostrar SweetAlert de error con los errores de validación
+            Swal.fire({
+                title: 'Error',
+                html: errorMessage,
+                icon: 'error',
+            });
+        } else { // If no message is provided, show a generic error message
+            // Mostrar SweetAlert de error genérico
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un error al procesar su solicitud. Por favor, revise los campos e inténtelo de nuevo.',
+                icon: 'error'
+            });
+        }
+    })
+    .catch(errors => {
+        // Mostrar SweetAlert de error en caso de un fallo en la solicitud
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error al procesar su solicitud. Por favor, inténtelo de nuevo más tarde.',
+            icon: 'error'
+        });
+        console.error('Error:', errors);
+    });
+}
+
+
+    // Agregar evento clic para el botón edit-reserva
+    $('.edit-reserva').on('click', function () {
+        // Obtener la información de la reserva (ajusta esto según tu lógica)
+        var reservaInfo = {
+            Reserva: "Datos de Reserva",
+            fecha: "Fecha de la Reserva",
+            fecha_cita: "Fecha de la Cita",
+            descripcion: "Descripción de la Reserva",
+            estado: "Estado de la Reserva"
+        };
+
+        // Llenar la modal con la información de la reserva
+        $('#editReservaModal #Reserva').val(reservaInfo.Reserva);
+        $('#editReservaModal #fecha').val(reservaInfo.fecha);
+        $('#editReservaModal #fecha_cita').val(reservaInfo.fecha_cita);
+        $('#editReservaModal #descripcion').val(reservaInfo.descripcion);
+        $('#editReservaModal #estado').val(reservaInfo.estado);
+
+        // Mostrar la modal
+        $('#editReservaModal').modal('show');
+    });
+
+
+    $(document).ready(function () {
+        // Destruir la instancia actual, si existe
+        if ($.fn.DataTable.isDataTable('#reservaTable')) {
+            $('#reservaTable').DataTable().destroy();
+        }
+
+        // Configuración personalizada para DataTables
+        var dataTableConfig = {
+            // "pagingType": "full_numbers",
+            "lengthChange": false,
+            "pageLength": 5,
+            "searching": true,
+            "language": {
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron resultados",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+                "infoFiltered": "(filtrados de _MAX_ registros en total)",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
+            },
+            "dom": '<"top"lf>rt<"bottom"ip>',
+        };
+
+        // Inicializar DataTable con la configuración personalizada
+        var table = $('#reservaTable').DataTable(dataTableConfig);
+
+        // Mover el cuadro de búsqueda al lugar deseado
+        $("#reservaTable_filter").detach().appendTo(".top");
+
+        {% if 'Crear Reservas' in request.session.permisos %}
+        // Mover el botón "Agregar" al lado del cuadro de búsqueda
+        $(".top").append('<button type="button" class="btn btn-inverse-success btn-fw ml-2" data-toggle="modal" data-target="#myModal"  style="margin: 5px">Agregar</button>');
+        {% endif %}
+        // También puedes personalizar el estilo del cuadro de búsqueda si es necesario
+        $("#reservaTable_filter input").addClass("form-control form-control-sm");
+
+        // Puedes agregar más personalizaciones según tus necesidades
+
+
+
+    });
+    $(document).ready(function () {
+        // Destruir la instancia actual, si existe
+        if ($.fn.DataTable.isDataTable('#reservaTable')) {
+            $('#reservaTable').DataTable().destroy();
+        }
+
+        // Configuración personalizada para DataTables
+        var dataTableConfig = {
+            // "pagingType": "full_numbers",
+            "lengthChange": false,
+            "pageLength": 5,
+            "searching": true,
+            "language": {
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron resultados",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+                "infoFiltered": "(filtrados de _MAX_ registros en total)",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
+            },
+            "dom": '<"top"lf>rt<"bottom"ip>',
+        };
+
+        // Inicializar DataTable con la configuración personalizada
+        var table = $('#reservaTable').DataTable(dataTableConfig);
+
+        // Mover el cuadro de búsqueda al lugar deseado
+        $("#reservaTable_filter").detach().appendTo(".top");
+
+        {% if 'Crear Reservas' in request.session.permisos %}
+        // Mover el botón "Agregar" al lado del cuadro de búsqueda
+        $(".top").append('<button type="button" class="btn btn-inverse-success btn-fw ml-2" data-toggle="modal" data-target="#myModal"  style="margin: 5px">Agregar</button>');
+        {% endif %}
+
+        // También puedes personalizar el estilo del cuadro de búsqueda si es necesario
+        $("#reservaTable_filter input").addClass("form-control form-control-sm");
+
+        // Puedes agregar más personalizaciones según tus necesidades
+
+
+
+    });
+
+    function EditarReservaxd(reservaId) {
+        event.preventDefault();
+
+        // Obtener el formulario
+        const form = document.getElementById(`editarReservaform${reservaId}`);
+        // Crear un objeto FormData para enviar los datos del formulario
+        const formData = new FormData(form);
+
+        const formDataString = JSON.stringify(Object.fromEntries(formData));
+        const formString = form.outerHTML;
+
+        // Realizar la solicitud POST utilizando fetch
+        fetch("{% url 'reservas:editar_reserva' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Verificar si la solicitud fue exitosa
+                if (data.success) {
+                    // Mostrar SweetAlert de éxito
+                    Swal.fire({
+                        title: '¡Actualización exitosa!',
+                        text: 'La reserva se ha editado correctamente.',
+                        icon: 'success',
+                        onClose: () => {
+                            // Recargar la página   
+                            location.reload();
+                        }
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else if (data.errors) { // Verificar si hay errores de validación
+                    let errorMessage = "Hubo un error al procesar su solicitud:<br>";
+                    for (const key in data.errors) {
+                        errorMessage += `${data.errors[key]}<br>`;
+                    }
+                    Swal.fire({
+                        title: 'Error',
+                        html: errorMessage,
+                        icon: 'error',
+                    });
+                } else { // Si no hay errores específicos de validación, mostrar un mensaje genérico de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un error al procesar su solicitud. Por favor, revise los campos e inténtelo de nuevo.',
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(errors => {
+                // Mostrar SweetAlert de error en caso de un fallo en la solicitud
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un error al procesar su solicitud. Por favor, inténtelo de nuevo más tarde.',
+                    icon: 'error'
+                });
+                console.error('Error:', errors);
+            });
+    }
+
+
+
+    // Función para eliminar un usuario
+    function eliminarReserva(reserva_id) {
+        // Realizar la solicitud POST utilizando fetch
+        fetch("{% url 'reservas:eliminar_reserva' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({'reserva_id': reserva_id})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('reserva eliminada correctamente').then(() => {
+                        location.reload();
+                    });
+            } else {
+                // Mostrar un mensaje de error si la eliminación falla
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        })
+        .catch(error => {
+            // Mostrar un mensaje de error en caso de un fallo en la solicitud
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un error al intentar eliminar la reserva. Por favor, inténtelo de nuevo más tarde.',
+                icon: 'error'
+            });
+        });
+    }
+
+    // Event listener para el botón de eliminar usuario
+    document.querySelectorAll('.delete-reserva').forEach(button => {
+        button.addEventListener('click', function() {
+            const reservaId = this.getAttribute('data-reserva-id');
+            var reserva_id = $(this).data('reserva-id');
+            // Confirmar antes de eliminar
+            Swal.fire({
+                title: '¿Estás seguro?',
+                // text: `Esta acción no se puede deshacer para el usuario con ID ${usuarioId}.`,
+                text: `Esta acción no se puede deshacer`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    eliminarReserva(reservaId);
+                }
+            });
+        });
+    });
+</script>
+{% if not request.session.usuario_id %}
+<script>
+    window.location.href = "{% url 'usuarios:requestLogin' %}";
+
+</script>
+{% elif "Listar Reservas" not in request.session.permisos %}
+<script>
+    window.location.href = "{% url 'usuarios:requestLogin' %}";
+
+</script>
+{% endif %}
+{% endblock %}

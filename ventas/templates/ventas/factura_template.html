@@ -1,0 +1,135 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Factura de Venta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.2;
+            background-color: #fff;
+            padding: 10px;
+            margin: auto;
+            width: 60mm; /* Ancho típico de un recibo de tirilla */
+            max-width: 60mm;
+        }
+        h2, h3, h4 {
+            text-align: center;
+            color: #333;
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+        th, td {
+            border: 1px solid #000; /* Borde negro */
+            padding: 5px; /* Relleno interno */
+            text-align: left;
+            font-size: 12px; /* Tamaño de fuente reducido */
+        }
+        th {
+            background-color: #f2f2f2; /* Fondo gris claro para las cabeceras */
+        }
+        .total {
+            margin-top: 10px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .cliente-info, .venta-info, .productos, .servicios {
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+        }
+        .info-item {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Factura de Venta</h2>
+
+    <!-- Información del Cliente -->
+    <div class="cliente-info">
+        <h3>Información del Cliente</h3>
+        <p class="info-item"><strong>Nombre:</strong> {{ venta.idPedido.id_Usuario.nombre }}</p>
+        <p class="info-item"><strong>Documento:</strong> {{ venta.idPedido.id_Usuario.documento }}</p>
+    </div>
+
+    <!-- Información de la Venta -->
+    <div class="venta-info">
+        <h3>Detalles de la Venta</h3>
+        <p class="info-item"><strong>Fecha:</strong> {{ venta.fecha }}</p>
+        <p class="info-item"><strong>Método de Pago:</strong> {{ venta.metodo_pago }}</p>
+        <p class="info-item"><strong>Subtotal:</strong> ${{ venta.idPedido.subtotal|floatformat:0|intcomma }}</p>
+        <p class="info-item"><strong>IVA:</strong> ${{ venta.idPedido.iva|floatformat:0|intcomma }}</p>
+        <p class="info-item"><strong>Total Pedido:</strong> ${{ venta.idPedido.total|floatformat:0|intcomma }}</p>
+        <p class="info-item"><strong>Descuento/Aumento:</strong> ${{ descuento_aumento|floatformat:0|intcomma }}</p>
+        <p class="total"><strong>Total Final:</strong> ${{ venta.total|floatformat:0|intcomma }}</p>
+    </div>
+    {% if venta.idPedido.productos.count %}
+
+    <!-- Detalles de los Productos Vendidos -->
+    <div class="productos">
+        <h3>Productos Vendidos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cant</th>
+                    <th>Precio Unit</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles_productos %}
+                <tr>
+                    <td>{{ detalle.nombre_productos }}</td>
+                    <td>{{ detalle.cant_productos }}</td>
+                    <td>${{ detalle.precio_inicial_producto|floatformat:0|intcomma }}</td>
+                    <td>${{ detalle.subtotal_productos|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if venta.idPedido.servicios.count %}
+
+    <!-- Detalles de los Servicios Vendidos -->
+    <div class="servicios">
+        <h3>Servicios Vendidos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Cant</th>
+                    <th>Precio Unit</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalleS in detalles_servicios %}
+                <tr>
+                    <td>{{ detalleS.idServicio.nombre_servicio }}</td>
+                    <td>{{ detalleS.cantidad_servicios }}</td>
+                    <td>${{ detalleS.precio_inicial_servicio|floatformat:0|intcomma }}</td>
+                    <td>${{ detalleS.subtotal_servicios|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>
