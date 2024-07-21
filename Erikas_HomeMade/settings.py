@@ -110,7 +110,7 @@ DATABASES = {
     #     'PORT': '3306',  # El puerto por defecto de MySQL
     # }
     'default': dj_database_url.config(
-        default = 'postgresql://postgres:postgres@localhost:5432/erikas-postgres',
+        default = 'postgresql://erikas_homemade_user:lIeZ1ziweMomss2zJr0Mj5A8JcuUB2jz@dpg-cqen9d8gph6c73atg2l0-a.oregon-postgres.render.com/erikas_homemade',
         conn_max_age = 600
     )
 }
