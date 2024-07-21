@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'usuarios',
     'reservas',
     'pedidos',
-    'ventas'
+    'ventas',
 ]
 
 MIDDLEWARE = [
@@ -162,7 +162,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    # os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'home', 'static'),
 ]
 
 
