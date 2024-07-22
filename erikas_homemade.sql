@@ -842,7 +842,7 @@ INSERT INTO `usuarios` (`id`, `nombre`, `telefono`, `documento`, `correo`, `usua
 (3, 'Danilo Vergara Lopez', '3177099118', '1025884970', 'danilovergara257@gmail.com', 'Dancraft', 'pbkdf2_sha256$720000$Zb8dKoUJWg74VSt7JmGNZw$7lWonzHtMmXRNECJykpGZtKTj9STpNZKPU7pLN6F448=', 'A', 4, 'user_images/iconosesion.jpg'),
 (4, 'Nelson Valencia Álzate', '3146060549', '1000898565', 'valenciaalzatenelsondavid@gmail.com', 'MurciaFeroz<3', 'pbkdf2_sha256$720000$lWBEdbkgEXpGKXYszZPoMb$uId0QrK7rsRRyjrzu0HQrwZ5UOE5aO7P9ztlZIb/bdg=', 'A', 2, 'user_images/iconosesion.jpg'),
 (5, 'Emmanuel Sanchez Herrera', '3203097136', '1033487380', 'sanchez252901@gmail.com', 'ikaed', 'pbkdf2_sha256$720000$6IcaA4RSeFsVfCrvmdVmb6$U7Q2Qu4hcQYOBQgTjnbS3YtLHBjKfCD53a8OkOzwPeA=', 'A', 2, 'user_images/iconosesion.jpg'),
-(6, 'Jhon Michael Contreras', '3213309428', '1091163415', 'jhomai7020@gmail.com', 'DarkKing516', 'pbkdf2_sha256$720000$3Ttqx0o2jBfBwAZTlfSmxY$K7mUe1sJ2t/BzBuP/9QE0+vYwdOXMJt/Z/9MegRoVcM=', 'A', 4, 'user_images/iconosesion.jpg');
+(6, 'Jhon Michael Contreras', '3213309428', '1091163415', 'jhomai7020@gmail.com', 'DarkKing516', 'pbkdf2_sha256$720000$3Ttqx0o2jBfBwAZTlfSmxY$K7mUe1sJ2t/BzBuP/9QE0+vYwdOXMJt/Z/9MegRoVcM=', 'A', 1, 'user_images/iconosesion.jpg');
 
 -- --------------------------------------------------------
 
