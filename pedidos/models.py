@@ -47,18 +47,18 @@ class Producto(models.Model):
     id_TipoProducto = models.ForeignKey(TipoProducto, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=255)
-    imagen = models.ImageField(upload_to='producto_imgs/')  # Ajusta la ruta según tu estructura de carpetas
+    imagen = models.ImageField(upload_to='producto_imgs/')
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    estado_producto = models.CharField(max_length=1)
-    estado_catalogo = models.CharField(max_length=1)
+    estado_producto = models.CharField(max_length=1, default='A')
+    estado_catalogo = models.CharField(max_length=1, default='A')
     cantidad = models.IntegerField()
 
     def __str__(self):
         return self.nombre
 
     class Meta:
-        db_table = 'productos'  # Personalizando el nombre de la tabla
-     
+        db_table = 'productos'
+
 
 class Pedido(models.Model):
     idPedido = models.AutoField(primary_key=True)

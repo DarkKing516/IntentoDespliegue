@@ -11,6 +11,15 @@ class Command(BaseCommand):
         sql_delete_roles_permisos = "DELETE FROM roles_permisos;"
         sql_delete_usuarios = "DELETE FROM usuarios;"
 
+        # SQL para ajustar el tipo de columnas
+        sql_alter_producto = """
+        ALTER TABLE productos
+        ALTER COLUMN estado_producto TYPE CHAR(1) USING estado_producto::CHAR(1),
+        ALTER COLUMN estado_catalogo TYPE CHAR(1) USING estado_catalogo::CHAR(1);
+        ALTER TABLE servicios
+        ALTER COLUMN estado_servicio TYPE CHAR(1) USING estado_servicio::CHAR(1),
+        ALTER COLUMN estado_catalogo TYPE CHAR(1) USING estado_catalogo::CHAR(1);
+        """
 
         # SQL para insertar roles
         sql_roles = """
@@ -215,6 +224,8 @@ class Command(BaseCommand):
 
         # Añade esta línea en tu método handle
         with connection.cursor() as cursor:
+            cursor.execute(sql_alter_producto)  # Ajusta el tipo de columnas
+
             # cursor.execute(sql_delete_roles_permisos)
             # cursor.execute(sql_delete_roles)
             # cursor.execute(sql_delete_permisos)
@@ -223,7 +234,7 @@ class Command(BaseCommand):
             # cursor.execute(sql_roles)
             # cursor.execute(sql_permisos)
             # cursor.execute(sql_roles_permisos)
-            cursor.execute(sql_usuario_admin)  # Ejecuta la inserción del usuario admin
+            # cursor.execute(sql_usuario_admin)  # Ejecuta la inserción del usuario admin
 
             
         self.stdout.write(self.style.SUCCESS('Datos iniciales cargados exitosamente.'))
